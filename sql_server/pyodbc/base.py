@@ -300,7 +300,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         if self.database_engine == 'sybase_ase':
             self.features.has_bulk_insert = False
             # Sybase ASE has a slightly different IDENTITY syntax
-            self.creation.data_types['AutoField'] = 'numeric(38, 0) IDENTITY'
+            self.data_types['AutoField'] = 'numeric(38, 0) IDENTITY'
 
         if self.use_legacy_datetime:
             self._use_legacy_datetime()
