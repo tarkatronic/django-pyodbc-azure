@@ -173,6 +173,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         self.introspection = DatabaseIntrospection(self)
         self.validation = BaseDatabaseValidation(self)
 
+        # Specify the database engine being accessed. Supported values: mssql, sybase_ase
+        self.database_engine = opts.get('database_engine', 'mssql')
+
     def create_cursor(self):
         if self.supports_mars:
             cursor = self.connection.cursor()
@@ -290,9 +293,14 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         return conn
 
     def init_connection_state(self):
-        if self.sql_server_version < 2008:
+        if self.database_engine == 'mssql' and self.sql_server_version < 2008:
             self.use_legacy_datetime = True
             self.features.has_bulk_insert = False
+
+        if self.database_engine == 'sybase_ase':
+            self.features.has_bulk_insert = False
+            # Sybase ASE has a slightly different IDENTITY syntax
+            self.creation.data_types['AutoField'] = 'numeric(38, 0) IDENTITY'
 
         if self.use_legacy_datetime:
             self._use_legacy_datetime()
