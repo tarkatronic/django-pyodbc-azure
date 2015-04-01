@@ -12,14 +12,14 @@ django-pyodbc-azure
 `Django <http://djangoproject.com/>`__ Microsoft SQL Server external
 DB backend that uses ODBC by employing the
 `pyodbc <https://code.google.com/p/pyodbc/>`__ library. It supports
-Microsoft SQL Server and Azure SQL Database.
+Microsoft SQL Server, Azure SQL Database, and Sybase ASE.
 
 Features
 --------
 
 -  Supports Django 1.7.6
--  Supports Microsoft SQL Server 2005, 2008/2008R2, 2012, 2014 and
-   Azure SQL Database
+-  Supports Microsoft SQL Server 2005, 2008/2008R2, 2012, 2014,
+   Azure SQL Database, and Sybase ASE
 -  Supports LIMIT+OFFSET and offset w/o LIMIT emulation.
 -  Passes most of the tests of the Django test suite.
 -  Compatible with *SQL Server* , *SQL Server Native Client* ,
