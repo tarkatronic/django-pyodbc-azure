@@ -274,7 +274,7 @@ class SQLAggregateCompiler(compiler.SQLAggregateCompiler, SQLCompiler):
         self._wrap_aggregates()
         return super(SQLAggregateCompiler, self).as_sql(qn=qn)
 
-if DjangoVersion[:2] >= (1,8):
+if DjangoVersion[:2] <= (1,8):
     # SQLDateCompiler and SQLDateTimeCompiler were removed in Django 1.8
     class SQLDateCompiler(compiler.SQLDateCompiler, SQLCompiler):
         pass
