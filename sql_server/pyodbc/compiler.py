@@ -3,6 +3,7 @@ try:
 except ImportError:
     from itertools import izip_longest as zip_longest
 
+from django import VERSION as DjangoVersion
 from django.db.models.sql import compiler
 from django.db.transaction import TransactionManagementError
 from django.utils import six
@@ -272,8 +273,10 @@ class SQLAggregateCompiler(compiler.SQLAggregateCompiler, SQLCompiler):
         self._wrap_aggregates()
         return super(SQLAggregateCompiler, self).as_sql(qn=qn)
 
-class SQLDateCompiler(compiler.SQLDateCompiler, SQLCompiler):
-    pass
+if DjangoVersion[:2] >= (1,8):
+    # SQLDateCompiler and SQLDateTimeCompiler were removed in Django 1.8
+    class SQLDateCompiler(compiler.SQLDateCompiler, SQLCompiler):
+        pass
 
-class SQLDateTimeCompiler(compiler.SQLDateTimeCompiler, SQLCompiler):
-    pass
+    class SQLDateTimeCompiler(compiler.SQLDateTimeCompiler, SQLCompiler):
+        pass
