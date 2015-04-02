@@ -1,6 +1,7 @@
 import datetime
 import time
 
+from django import VERSION as DjangoVersion
 from django.conf import settings
 try:
     from django.db.backends.base.operations import BaseDatabaseOperations
@@ -84,20 +85,33 @@ class DatabaseOperations(BaseDatabaseOperations):
         else:
             return "DATEPART(%s, %s)" % (lookup_type, field_name)
 
-    def date_interval_sql(self, sql, connector, timedelta):
-        """
-        implements the interval functionality for expressions
-        """
-        sign = 1
-        if connector != '+':
-            sign = -1
-        sec = (timedelta.seconds + timedelta.days * 86400) * sign
-        if sec:
-            sql = 'DATEADD(SECOND, %d, CAST(%s AS DATETIME))' % (sec, sql)
-        if timedelta.microseconds and self.connection.sql_server_version >= 2008:
-            sql = 'DATEADD(MICROSECOND, %d, CAST(%s AS DATETIME2))' % \
-                (timedelta.microseconds * sign, sql)
-        return sql
+    if DjangoVersion[:2] < (1, 8):
+        def date_interval_sql(self, sql, connector, timedelta):
+            """
+            implements the interval functionality for expressions
+            """
+            sign = 1
+            if connector != '+':
+                sign = -1
+            sec = (timedelta.seconds + timedelta.days * 86400) * sign
+            if sec:
+                sql = 'DATEADD(SECOND, %d, CAST(%s AS DATETIME))' % (sec, sql)
+            if timedelta.microseconds and self.connection.sql_server_version >= 2008:
+                sql = 'DATEADD(MICROSECOND, %d, CAST(%s AS DATETIME2))' % \
+                    (timedelta.microseconds * sign, sql)
+            return sql
+    else:
+        def date_interval_sql(self, timedelta):
+            """
+            implements the interval functionality for expressions
+            """
+            sec = (timedelta.seconds + timedelta.days * 86400)
+            if sec:
+                sql = 'SECOND, %d' % sec
+            if timedelta.microseconds and self.connection.sql_server_version >= 2008:
+                sql = 'MICROSECOND, %d' % timedelta.microseconds
+            return sql
+
 
     def date_trunc_sql(self, lookup_type, field_name):
         """
