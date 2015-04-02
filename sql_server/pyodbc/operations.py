@@ -2,7 +2,10 @@ import datetime
 import time
 
 from django.conf import settings
-from django.db.backends import BaseDatabaseOperations
+try:
+    from django.db.backends.base.operations import BaseDatabaseOperations
+except ImportError:
+    from django.db.backends import BaseDatabaseOperations
 from django.utils import timezone
 from django.utils.six import string_types
 

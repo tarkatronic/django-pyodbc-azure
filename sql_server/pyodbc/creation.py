@@ -1,45 +1,18 @@
-from django.db.backends.creation import BaseDatabaseCreation
+try:
+    from django.db.backends.base.creation import BaseDatabaseCreation
+except ImportError:
+    from django.db.backends.creation import BaseDatabaseCreation
 from django.db.backends.util import truncate_name
 from django.utils.six import b
 
 
 class DatabaseCreation(BaseDatabaseCreation):
-    # This dictionary maps Field objects to their associated MS SQL column
-    # types, as strings. Column-type strings can contain format strings; they'll
-    # be interpolated against the values of Field.__dict__ before being output.
-    # If a column type is set to None, it won't be included in the output.
-    data_types = {
-        'AutoField':         'int IDENTITY (1, 1)',
-        'BigIntegerField':   'bigint',
-        'BinaryField':       'varbinary(max)',
-        'BooleanField':      'bit',
-        'CharField':         'nvarchar(%(max_length)s)',
-        'CommaSeparatedIntegerField': 'nvarchar(%(max_length)s)',
-        'DateField':         'date',
-        'DateTimeField':     'datetime2',
-        'DecimalField':      'numeric(%(max_digits)s, %(decimal_places)s)',
-        'FileField':         'nvarchar(%(max_length)s)',
-        'FilePathField':     'nvarchar(%(max_length)s)',
-        'FloatField':        'double precision',
-        'IntegerField':      'int',
-        'IPAddressField':    'nvarchar(15)',
-        'GenericIPAddressField': 'nvarchar(39)',
-        'NullBooleanField':  'bit',
-        'OneToOneField':     'int',
-        'PositiveIntegerField': 'int',
-        'PositiveSmallIntegerField': 'smallint',
-        'SlugField':         'nvarchar(%(max_length)s)',
-        'SmallIntegerField': 'smallint',
-        'TextField':         'nvarchar(max)',
-        'TimeField':         'time',
-    }
-
-    data_type_check_constraints = {
-        'PositiveIntegerField': '[%(column)s] >= 0',
-        'PositiveSmallIntegerField': '[%(column)s] >= 0',
-    }
 
     def __init__(self, connection):
+        # For Django versions < 1.8
+        self.data_types = connection.data_types
+        self.data_types_suffix = connection.data_types_suffix
+        self.data_type_check_constraints = connection.data_type_check_constraints
         super(DatabaseCreation, self).__init__(connection)
 
     def _create_test_db(self, verbosity, autoclobber):

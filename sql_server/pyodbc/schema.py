@@ -2,7 +2,10 @@ import binascii
 import datetime
 import operator
 
-from django.db.backends.schema import BaseDatabaseSchemaEditor, logger
+try:
+    from django.db.backends.base.schema import BaseDatabaseSchemaEditor, logger
+except ImportError:
+    from django.db.backends.schema import BaseDatabaseSchemaEditor, logger
 from django.db.models.fields import AutoField
 from django.db.models.fields.related import ManyToManyField
 from django.utils import six

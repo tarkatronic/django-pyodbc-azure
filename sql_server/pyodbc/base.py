@@ -17,7 +17,13 @@ if pyodbc_ver < (3, 0):
     raise ImproperlyConfigured("pyodbc 3.0 or newer is required; you have %s" % Database.version)
 
 from django.conf import settings
-from django.db.backends import *
+try:
+    from django.db.backends.base.base import BaseDatabaseWrapper
+    from django.db.backends.base.features import BaseDatabaseFeatures
+    from django.db.backends.base.validation import BaseDatabaseValidation
+except ImportError:
+    from django.db.backends import (BaseDatabaseWrapper, BaseDatabaseFeatures,
+                                    BaseDatabaseValidation)
 from django.utils.encoding import smart_str
 from django.utils.functional import cached_property
 from django.utils.six import binary_type, text_type
@@ -72,6 +78,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     supports_transactions = True
     uses_savepoints = True
 
+
 class DatabaseWrapper(BaseDatabaseWrapper):
     _DJANGO_VERSION = _DJANGO_VERSION
     vendor = 'microsoft'
@@ -91,6 +98,41 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         'istartswith': "LIKE UPPER(%s) ESCAPE '\\'",
         'iendswith': "LIKE UPPER(%s) ESCAPE '\\'",
     }
+    # This dictionary maps Field objects to their associated MS SQL column
+    # types, as strings. Column-type strings can contain format strings; they'll
+    # be interpolated against the values of Field.__dict__ before being output.
+    # If a column type is set to None, it won't be included in the output.
+    data_types = {
+        'AutoField': 'int IDENTITY (1, 1)',
+        'BigIntegerField': 'bigint',
+        'BinaryField': 'varbinary(max)',
+        'BooleanField': 'bit',
+        'CharField': 'nvarchar(%(max_length)s)',
+        'CommaSeparatedIntegerField': 'nvarchar(%(max_length)s)',
+        'DateField': 'date',
+        'DateTimeField': 'datetime2',
+        'DecimalField': 'numeric(%(max_digits)s, %(decimal_places)s)',
+        'FileField': 'nvarchar(%(max_length)s)',
+        'FilePathField': 'nvarchar(%(max_length)s)',
+        'FloatField': 'double precision',
+        'IntegerField': 'int',
+        'IPAddressField': 'nvarchar(15)',
+        'GenericIPAddressField': 'nvarchar(39)',
+        'NullBooleanField': 'bit',
+        'OneToOneField': 'int',
+        'PositiveIntegerField': 'int',
+        'PositiveSmallIntegerField': 'smallint',
+        'SlugField': 'nvarchar(%(max_length)s)',
+        'SmallIntegerField': 'smallint',
+        'TextField': 'nvarchar(max)',
+        'TimeField': 'time',
+    }
+
+    data_type_check_constraints = {
+        'PositiveIntegerField': '[%(column)s] >= 0',
+        'PositiveSmallIntegerField': '[%(column)s] >= 0',
+    }
+
     _codes_for_networkerror = (
         '08S01',
         '08S02',
