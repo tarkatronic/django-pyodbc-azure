@@ -22,7 +22,7 @@ class SQLCompiler(compiler.SQLCompiler):
             values.append(value)
         return tuple(values)
 
-    def as_sql(self, with_limits=True, with_col_aliases=False):
+    def as_sql(self, with_limits=True, with_col_aliases=False, subquery=False):
         """
         Creates the SQL for this query. Returns the SQL string and list of
         parameters.
@@ -30,6 +30,7 @@ class SQLCompiler(compiler.SQLCompiler):
         If 'with_limits' is False, any limit/offset information is not included
         in the query.
         """
+        self.subquery = subquery
         if with_limits and self.query.low_mark == self.query.high_mark:
             return '', ()
 
